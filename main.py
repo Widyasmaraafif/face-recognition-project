@@ -1,27 +1,19 @@
 import os
-# Suppress TensorFlow logs
-os.environ['TF_CPP_MIN_LOG_LEVEL'] = '3' 
-os.environ['TF_ENABLE_ONEDNN_OPTS'] = '0'
-
-from deepface import DeepFace
 import cv2
-from datetime import datetime
-import pandas as pd
 import time
+import pandas as pd
+from datetime import datetime
+from deepface import DeepFace
 
-# AI Model configuration
-# Alternatives: "VGG-Face" (580MB), "Facenet" (92MB), "SFace" (37MB)
-MODEL_NAME = "SFace" 
-DETECTOR_BACKEND = "opencv" # Faster for real-time
+import config
+from database import init_db, mark_attendance, get_recent_attendance
 
-# Create dataset directory if not exists
-if not os.path.exists("dataset"):
-    os.makedirs("dataset")
+# Initialize database
+init_db()
 
 # Attendance tracking dictionary to avoid duplicates
 # Format: { "name": last_seen_time }
 attendance_cache = {}
-ATTENDANCE_COOLDOWN = 60 # seconds
 
 def markAttendance(name):
     now = datetime.now()
@@ -30,28 +22,33 @@ def markAttendance(name):
     # Check if already marked within cooldown
     if name in attendance_cache:
         last_seen = attendance_cache[name]
-        if (time.time() - last_seen) < ATTENDANCE_COOLDOWN:
+        if (time.time() - last_seen) < config.ATTENDANCE_COOLDOWN:
             return
             
     # Update cache
     attendance_cache[name] = time.time()
     
-    # Record to CSV
-    file_path = 'attendance.csv'
+    # Record to DB
+    if mark_attendance(name):
+        print(f"Recorded attendance in DB: {name} at {current_time}")
+    
+    # Record to CSV (Legacy support)
+    file_path = config.CSV_LOG_FILE
     if not os.path.exists(file_path):
         df = pd.DataFrame(columns=['Name', 'Time'])
         df.to_csv(file_path, index=False)
         
     df = pd.DataFrame([[name, current_time]], columns=['Name', 'Time'])
     df.to_csv(file_path, mode='a', header=False, index=False)
-    print(f"Recorded attendance for: {name} at {current_time}")
+    # print(f"Recorded attendance in CSV for: {name} at {current_time}")
 
 cap = cv2.VideoCapture(0)
 frame_count = 0
 process_every_n_frames = 15 # Process every 15 frames to avoid lag
 last_detected_info = "Status: Idle"
+recent_logs = []
 
-print(f"Initializing AI System using {MODEL_NAME}...")
+print(f"Initializing AI System using {config.MODEL_NAME}...")
 
 while True:
     ret, frame = cap.read()
@@ -63,16 +60,16 @@ while True:
     # Process recognition periodically
     if frame_count % process_every_n_frames == 0:
         # Check if dataset is empty
-        if not os.path.exists("dataset") or not os.listdir("dataset"):
+        if not os.path.exists(config.DATASET_DIR) or not os.listdir(config.DATASET_DIR):
             last_detected_info = "Status: Dataset Empty"
         else:
             try:
                 results = DeepFace.find(
                     img_path=frame, 
-                    db_path="dataset", 
+                    db_path=config.DATASET_DIR, 
                     enforce_detection=False,
-                    model_name=MODEL_NAME,
-                    detector_backend=DETECTOR_BACKEND,
+                    model_name=config.MODEL_NAME,
+                    detector_backend=config.DETECTOR_BACKEND,
                     silent=True
                 )
                 
@@ -101,6 +98,9 @@ while True:
                         
                         # Mark attendance
                         markAttendance(name)
+                        
+                        # Fetch recent logs from DB
+                        recent_logs = get_recent_attendance(3)
                 
                 if not found_match:
                     last_detected_info = "Status: Scanning..."
@@ -108,9 +108,20 @@ while True:
                 # print(f"Recognition error: {e}")
                 pass
 
-    # Draw Status Bar
+    # Draw Status Bar (Top)
     cv2.rectangle(frame, (0, 0), (frame.shape[1], 40), (0, 0, 0), -1)
     cv2.putText(frame, last_detected_info, (10, 30), cv2.FONT_HERSHEY_SIMPLEX, 0.7, (255, 255, 255), 2)
+
+    # Draw History (Bottom Right)
+    if recent_logs:
+        h, w, _ = frame.shape
+        start_y = h - (len(recent_logs) * 30) - 20
+        cv2.rectangle(frame, (w - 250, start_y - 30), (w, h), (0, 0, 0), -1)
+        cv2.putText(frame, "Recent Logs:", (w - 240, start_y - 10), cv2.FONT_HERSHEY_SIMPLEX, 0.6, (0, 255, 255), 1)
+        for i, (name, timestamp) in enumerate(recent_logs):
+            log_time = timestamp.split(" ")[1] if " " in timestamp else timestamp
+            text = f"{name} - {log_time}"
+            cv2.putText(frame, text, (w - 240, start_y + (i * 30) + 15), cv2.FONT_HERSHEY_SIMPLEX, 0.5, (255, 255, 255), 1)
 
     # Show video feed
     cv2.imshow("Face Recognition Attendance System", frame)

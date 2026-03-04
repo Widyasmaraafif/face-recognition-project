@@ -1,20 +1,23 @@
 import cv2
 import os
+from database import init_db, add_user
+import config
 
 def register_face():
-    # Create dataset directory if not exists
-    if not os.path.exists("dataset"):
-        os.makedirs("dataset")
+    # Ensure DB is initialized
+    init_db()
 
     name = input("Masukkan nama untuk pendaftaran: ").strip()
     if not name:
         print("Nama tidak boleh kosong!")
         return
 
-    # Create folder for the user if using DeepFace standard structure (optional, but good for organization)
-    # However, DeepFace.find can work with flat files too. 
-    # Let's keep it simple: dataset/name.jpg
-    
+    # Add user to database
+    if add_user(name):
+        print(f"Pendaftaran user {name} ke database berhasil.")
+    else:
+        print(f"Pendaftaran user {name} ke database gagal atau user sudah ada.")
+
     cap = cv2.VideoCapture(0)
     print(f"Menyiapkan kamera untuk {name}...")
     print("Tekan 's' untuk mengambil foto, 'q' untuk batal.")
@@ -29,7 +32,7 @@ def register_face():
 
         key = cv2.waitKey(1) & 0xFF
         if key == ord('s'):
-            img_path = os.path.join("dataset", f"{name}.jpg")
+            img_path = os.path.join(config.DATASET_DIR, f"{name}.jpg")
             cv2.imwrite(img_path, frame)
             print(f"Berhasil menyimpan wajah untuk {name} di {img_path}")
             break
