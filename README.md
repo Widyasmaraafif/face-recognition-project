@@ -2,16 +2,18 @@
 
 Sistem absensi otomatis berbasis Python yang menggunakan pustaka **DeepFace** untuk pengenalan wajah, **OpenCV** untuk pemrosesan video secara real-time, dan **SQLite** untuk manajemen data.
 
-## Fitur Utama
+## Fitur Unggulan v2.0
 
-- **Pengenalan Wajah Real-time**: Mendeteksi dan mengenali wajah dari webcam dengan visualisasi kotak pembatas dan nama.
-- **Integrasi Database (SQLite)**: Menyimpan data pengguna dan log absensi secara terstruktur, menggantikan CSV tradisional.
-- **Dashboard Admin (Streamlit)**: Antarmuka web modern untuk melihat statistik absensi, daftar pengguna, dan galeri foto dataset.
-- **Visualisasi UI Baru**: Menampilkan riwayat absensi terbaru (Recent Logs) langsung pada layar feed video.
-- **Model Ringan (SFace)**: Menggunakan model SFace (~37MB) untuk proses inisialisasi yang lebih cepat dan efisien.
-- **Pendaftaran Wajah Mudah**: Skrip pendaftaran terintegrasi langsung dengan database.
-- **Anti-Duplicate (Cooldown)**: Mencegah pencatatan ganda dalam rentang waktu tertentu (default 60 detik).
-- **File Konfigurasi Terpusat**: Pengaturan model, cooldown, dan direktori dapat diubah dengan mudah di `config.py`.
+- **Pengenalan Wajah Berulir (Threaded Recognition)**: Proses pengenalan wajah berjalan di thread terpisah, sehingga feed video tetap lancar (60 FPS) tanpa stuttering.
+- **Visualisasi Confidence Score**: Menampilkan persentase tingkat keyakinan AI pada setiap wajah yang terdeteksi.
+- **Profil Pengguna Lengkap**: Database kini mendukung penyimpanan data Departemen dan Jabatan untuk setiap pengguna.
+- **Dashboard Admin Canggih**:
+  - **Filter Tanggal**: Melihat laporan kehadiran pada rentang waktu tertentu.
+  - **Visualisasi Statistik**: Grafik kehadiran per orang dan per departemen.
+  - **Ekspor Data Multi-Format**: Unduh laporan kehadiran langsung ke format **Excel (.xlsx)** atau **CSV**.
+  - **Galeri Dataset**: Melihat foto wajah yang telah terdaftar langsung dari dashboard.
+- **Integrasi Database (SQLite)**: Manajemen data terpusat dan efisien di `attendance_system.db`.
+- **Anti-Duplicate (Cooldown)**: Mencegah pencatatan ganda dalam rentang waktu yang dapat dikonfigurasi.
 
 ## Persyaratan Sistem
 
@@ -30,11 +32,11 @@ Sistem absensi otomatis berbasis Python yang menggunakan pustaka **DeepFace** un
 ## Cara Penggunaan
 
 ### 1. Pendaftaran Wajah Baru
-Daftarkan wajah ke dalam database dan dataset:
+Daftarkan wajah dengan data lengkap:
 ```bash
 python register.py
 ```
-- Masukkan nama saat diminta.
+- Masukkan nama, departemen, dan jabatan.
 - Tekan **'s'** untuk menyimpan foto.
 - Tekan **'q'** untuk batal.
 
@@ -43,8 +45,8 @@ Jalankan aplikasi utama untuk mulai mengenali wajah:
 ```bash
 python main.py
 ```
-- Wajah yang dikenali akan otomatis tercatat di database `attendance_system.db`.
-- Riwayat singkat akan muncul di pojok kanan bawah layar.
+- Feed video akan tetap lancar berkat teknologi threading.
+- Status deteksi dan confidence score muncul secara real-time.
 - Tekan **'q'** pada jendela video untuk keluar.
 
 ### 3. Membuka Dashboard Admin
@@ -55,15 +57,15 @@ streamlit run dashboard.py
 
 ## Struktur Proyek
 
-- `main.py`: Aplikasi utama pengenalan wajah.
-- `register.py`: Skrip pendaftaran wajah baru.
-- `dashboard.py`: Dashboard admin berbasis Streamlit.
-- `database.py`: Modul untuk interaksi dengan database SQLite.
-- `config.py`: File konfigurasi sistem.
-- `attendance_system.db`: Database SQLite (otomatis dibuat).
+- `main.py`: Aplikasi utama dengan pengenalan wajah threaded.
+- `register.py`: Skrip pendaftaran wajah dengan profil lengkap.
+- `dashboard.py`: Dashboard admin interaktif dengan fitur ekspor Excel.
+- `database.py`: Modul manajemen database SQLite.
+- `config.py`: File konfigurasi (Model AI, Cooldown, Direktori).
+- `attendance_system.db`: Database SQLite pusat.
 - `dataset/`: Folder penyimpanan foto wajah terdaftar.
-- `requirements.txt`: Daftar pustaka Python yang dibutuhkan.
+- `requirements.txt`: Daftar pustaka Python terbaru.
 
 ## Catatan
-- Pastikan pencahayaan cukup saat pendaftaran dan proses absensi.
-- Jika ingin mengganti model (misal ke VGG-Face atau Facenet), ubah nilai `MODEL_NAME` di `config.py`.
+- Gunakan pencahayaan yang cukup untuk mendapatkan tingkat kepercayaan (Confidence Score) yang tinggi.
+- Model default yang digunakan adalah **SFace** (~37MB) karena kecepatannya yang optimal untuk real-time.

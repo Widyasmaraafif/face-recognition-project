@@ -12,9 +12,12 @@ def register_face():
         print("Nama tidak boleh kosong!")
         return
 
+    dept = input("Masukkan Departemen (Opsional): ").strip() or "Umum"
+    role = input("Masukkan Jabatan (Opsional): ").strip() or "Karyawan"
+
     # Add user to database
-    if add_user(name):
-        print(f"Pendaftaran user {name} ke database berhasil.")
+    if add_user(name, dept, role):
+        print(f"Pendaftaran user {name} ({dept} - {role}) ke database berhasil.")
     else:
         print(f"Pendaftaran user {name} ke database gagal atau user sudah ada.")
 

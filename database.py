@@ -13,6 +13,8 @@ def init_db():
         CREATE TABLE IF NOT EXISTS users (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
             name TEXT UNIQUE NOT NULL,
+            department TEXT,
+            role TEXT,
             registration_date TIMESTAMP DEFAULT CURRENT_TIMESTAMP
         )
     ''')
@@ -30,11 +32,11 @@ def init_db():
     conn.commit()
     conn.close()
 
-def add_user(name):
+def add_user(name, department="Umum", role="Karyawan"):
     try:
         conn = sqlite3.connect(DB_NAME)
         cursor = conn.cursor()
-        cursor.execute("INSERT OR IGNORE INTO users (name) VALUES (?)", (name,))
+        cursor.execute("INSERT OR IGNORE INTO users (name, department, role) VALUES (?, ?, ?)", (name, department, role))
         conn.commit()
         conn.close()
         return True
