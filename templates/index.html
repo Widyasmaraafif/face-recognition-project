@@ -1,0 +1,136 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Face Recognition Web Attendance</title>
+    <style>
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; text-align: center; background-color: #f4f7f6; margin: 0; padding: 20px; }
+        .container { max-width: 800px; margin: 0 auto; background: white; padding: 20px; border-radius: 12px; box-shadow: 0 4px 10px rgba(0,0,0,0.1); }
+        h1 { color: #333; margin-bottom: 20px; }
+        .video-wrapper { position: relative; width: 640px; height: 480px; margin: 0 auto; border: 4px solid #333; border-radius: 8px; overflow: hidden; background-color: #000; }
+        video, canvas { position: absolute; top: 0; left: 0; width: 100%; height: 100%; }
+        .status-bar { background-color: #222; color: white; padding: 10px; border-radius: 4px; margin-top: 15px; font-weight: bold; }
+        .log-section { margin-top: 25px; text-align: left; }
+        .log-list { list-style: none; padding: 0; border: 1px solid #ddd; border-radius: 4px; background-color: #fafafa; }
+        .log-item { padding: 10px; border-bottom: 1px solid #eee; display: flex; justify-content: space-between; }
+        .log-item:last-child { border-bottom: none; }
+        .log-name { font-weight: bold; color: #2c3e50; }
+        .log-time { color: #7f8c8d; font-size: 0.9em; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Face Recognition System (Web)</h1>
+        
+        <div class="video-wrapper">
+            <video id="video" autoplay playsinline></video>
+            <canvas id="canvas"></canvas>
+        </div>
+        
+        <div id="status" class="status-bar">Status: Mengaktifkan Kamera...</div>
+        
+        <div class="log-section">
+            <h3>Riwayat Terkini</h3>
+            <ul id="logList" class="log-list">
+                <!-- Logs will appear here -->
+            </ul>
+        </div>
+    </div>
+
+    <script>
+        const video = document.getElementById('video');
+        const canvas = document.getElementById('canvas');
+        const ctx = canvas.getContext('2d');
+        const statusDiv = document.getElementById('status');
+        const logList = document.getElementById('logList');
+
+        // Access camera
+        async function startCamera() {
+            try {
+                const stream = await navigator.mediaDevices.getUserMedia({ video: true });
+                video.srcObject = stream;
+                statusDiv.innerText = "Status: Kamera Aktif - Memindai...";
+                
+                // Set canvas size to match video
+                video.onloadedmetadata = () => {
+                    canvas.width = video.videoWidth;
+                    canvas.height = video.videoHeight;
+                    // Start processing loop
+                    setInterval(processFrame, 1500); // Every 1.5 seconds to save resources
+                };
+            } catch (err) {
+                console.error("Camera access error:", err);
+                statusDiv.innerText = "Status: Error Akses Kamera!";
+            }
+        }
+
+        async function processFrame() {
+            // Draw current video frame to hidden canvas to get image data
+            const tempCanvas = document.createElement('canvas');
+            tempCanvas.width = video.videoWidth;
+            tempCanvas.height = video.videoHeight;
+            const tempCtx = tempCanvas.getContext('2d');
+            tempCtx.drawImage(video, 0, 0, tempCanvas.width, tempCanvas.height);
+            
+            const base64Img = tempCanvas.toDataURL('image/jpeg', 0.8);
+            
+            try {
+                const response = await fetch('/process', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ image: base64Img })
+                });
+                
+                const data = await response.json();
+                
+                // Clear previous drawings
+                ctx.clearRect(0, 0, canvas.width, canvas.height);
+                
+                if (data.results && data.results.length > 0) {
+                    data.results.forEach(res => {
+                        const [x, y, w, h] = res.box;
+                        
+                        // Draw bounding box
+                        ctx.strokeStyle = '#00ff00';
+                        ctx.lineWidth = 3;
+                        ctx.strokeRect(x, y, w, h);
+                        
+                        // Draw name and confidence
+                        ctx.fillStyle = '#00ff00';
+                        ctx.font = '24px Arial';
+                        ctx.fillText(`${res.name} (${res.confidence}%)`, x, y - 10);
+                        
+                        statusDiv.innerText = `Terdeteksi: ${res.name} (${res.confidence}%)`;
+                    });
+                } else {
+                    statusDiv.innerText = "Status: Memindai Wajah...";
+                }
+                
+                // Update Logs
+                if (data.recent_logs) {
+                    updateLogs(data.recent_logs);
+                }
+                
+            } catch (err) {
+                console.error("Processing error:", err);
+            }
+        }
+
+        function updateLogs(logs) {
+            logList.innerHTML = '';
+            logs.forEach(log => {
+                const li = document.createElement('li');
+                li.className = 'log-item';
+                li.innerHTML = `
+                    <span class="log-name">${log.name}</span>
+                    <span class="log-time">${log.time}</span>
+                `;
+                logList.appendChild(li);
+            });
+        }
+
+        startCamera();
+    </script>
+</body>
+</html>
