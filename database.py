@@ -24,10 +24,18 @@ def init_db():
         CREATE TABLE IF NOT EXISTS attendance (
             id INTEGER PRIMARY KEY AUTOINCREMENT,
             user_name TEXT NOT NULL,
+            type TEXT DEFAULT 'masuk',
             timestamp TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
             FOREIGN KEY (user_name) REFERENCES users(name)
         )
     ''')
+    
+    # Migrate existing database if type column doesn't exist
+    try:
+        cursor.execute("ALTER TABLE attendance ADD COLUMN type TEXT DEFAULT 'masuk'")
+    except sqlite3.OperationalError:
+        # Column already exists
+        pass
     
     conn.commit()
     conn.close()
@@ -44,11 +52,11 @@ def add_user(name, department="Umum", role="Karyawan"):
         print(f"Error adding user: {e}")
         return False
 
-def mark_attendance(name):
+def mark_attendance(name, att_type="masuk"):
     try:
         conn = sqlite3.connect(DB_NAME)
         cursor = conn.cursor()
-        cursor.execute("INSERT INTO attendance (user_name) VALUES (?)", (name,))
+        cursor.execute("INSERT INTO attendance (user_name, type) VALUES (?, ?)", (name, att_type))
         conn.commit()
         conn.close()
         return True
@@ -61,7 +69,7 @@ def get_recent_attendance(limit=5):
         conn = sqlite3.connect(DB_NAME)
         cursor = conn.cursor()
         cursor.execute("""
-            SELECT user_name, timestamp 
+            SELECT user_name, timestamp, type 
             FROM attendance 
             ORDER BY timestamp DESC 
             LIMIT ?

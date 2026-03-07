@@ -19,7 +19,7 @@ init_db()
 # Attendance cache
 attendance_cache = {}
 
-def process_frame(img_base64):
+def process_frame(img_base64, att_type="masuk"):
     """Processes a base64 encoded frame for face recognition"""
     try:
         # Decode base64 to image
@@ -55,23 +55,24 @@ def process_frame(img_base64):
                 })
                 
                 # Mark attendance with cooldown
-                handle_attendance(name)
+                handle_attendance(name, att_type)
         
         return recognition_data
     except Exception as e:
         # print(f"Processing error: {e}")
         return []
 
-def handle_attendance(name):
+def handle_attendance(name, att_type):
     """Marks attendance with cooldown logic"""
     now = time.time()
-    if name in attendance_cache:
-        if (now - attendance_cache[name]) < config.ATTENDANCE_COOLDOWN:
+    cache_key = f"{name}_{att_type}"
+    if cache_key in attendance_cache:
+        if (now - attendance_cache[cache_key]) < config.ATTENDANCE_COOLDOWN:
             return
     
-    attendance_cache[name] = now
-    mark_attendance(name)
-    print(f"Recorded attendance for {name} via Web")
+    attendance_cache[cache_key] = now
+    mark_attendance(name, att_type)
+    print(f"Recorded {att_type} for {name} via Web")
 
 @app.route('/')
 def index():
@@ -83,12 +84,13 @@ def process():
     if not data or 'image' not in data:
         return jsonify({"error": "No image data"}), 400
     
-    results = process_frame(data['image'])
+    att_type = data.get('type', 'masuk')
+    results = process_frame(data['image'], att_type)
     recent_logs = get_recent_attendance(5)
     
     return jsonify({
         "results": results,
-        "recent_logs": [{"name": r[0], "time": r[1].split(" ")[1]} for r in recent_logs]
+        "recent_logs": [{"name": r[0], "time": r[1].split(" ")[1], "type": r[2]} for r in recent_logs]
     })
 
 if __name__ == '__main__':
