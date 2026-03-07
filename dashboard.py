@@ -82,7 +82,7 @@ if choice == "Dashboard":
         
         # Recent Attendance Table
         st.write("### Log Kehadiran Terbaru (Periode Ini)")
-        st.dataframe(df_merged[['user_name', 'department', 'role', 'type', 'timestamp']].head(20), use_container_width=True)
+        st.dataframe(df_merged[['user_name', 'department', 'role', 'type', 'shift', 'timestamp']].head(20), use_container_width=True)
         
     else:
         st.info(f"Tidak ada data kehadiran ditemukan untuk periode {d_start} s/d {d_end}.")
@@ -117,7 +117,7 @@ elif choice == "Raw Data":
     
     if not df.empty:
         # Reorder columns for better readability if they exist
-        cols_to_show = ['user_name', 'type', 'timestamp']
+        cols_to_show = ['user_name', 'type', 'shift', 'timestamp']
         if all(c in df.columns for c in cols_to_show):
             df_display = df[cols_to_show]
         else:

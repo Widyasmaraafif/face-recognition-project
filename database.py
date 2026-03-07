@@ -25,16 +25,21 @@ def init_db():
             id INTEGER PRIMARY KEY AUTOINCREMENT,
             user_name TEXT NOT NULL,
             type TEXT DEFAULT 'masuk',
+            shift TEXT DEFAULT 'Shift 1',
             timestamp TIMESTAMP DEFAULT CURRENT_TIMESTAMP,
             FOREIGN KEY (user_name) REFERENCES users(name)
         )
     ''')
     
-    # Migrate existing database if type column doesn't exist
+    # Migrate existing database if type or shift column doesn't exist
     try:
         cursor.execute("ALTER TABLE attendance ADD COLUMN type TEXT DEFAULT 'masuk'")
     except sqlite3.OperationalError:
-        # Column already exists
+        pass
+    
+    try:
+        cursor.execute("ALTER TABLE attendance ADD COLUMN shift TEXT DEFAULT 'Shift 1'")
+    except sqlite3.OperationalError:
         pass
     
     conn.commit()
@@ -52,11 +57,11 @@ def add_user(name, department="Umum", role="Karyawan"):
         print(f"Error adding user: {e}")
         return False
 
-def mark_attendance(name, att_type="masuk"):
+def mark_attendance(name, att_type="masuk", shift="Shift 1"):
     try:
         conn = sqlite3.connect(DB_NAME)
         cursor = conn.cursor()
-        cursor.execute("INSERT INTO attendance (user_name, type) VALUES (?, ?)", (name, att_type))
+        cursor.execute("INSERT INTO attendance (user_name, type, shift) VALUES (?, ?, ?)", (name, att_type, shift))
         conn.commit()
         conn.close()
         return True
@@ -69,7 +74,7 @@ def get_recent_attendance(limit=5):
         conn = sqlite3.connect(DB_NAME)
         cursor = conn.cursor()
         cursor.execute("""
-            SELECT user_name, timestamp, type 
+            SELECT user_name, timestamp, type, shift 
             FROM attendance 
             ORDER BY timestamp DESC 
             LIMIT ?

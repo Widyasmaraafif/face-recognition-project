@@ -19,7 +19,7 @@ init_db()
 # Attendance cache
 attendance_cache = {}
 
-def process_frame(img_base64, att_type="masuk"):
+def process_frame(img_base64, att_type="masuk", shift="Shift 1"):
     """Processes a base64 encoded frame for face recognition"""
     try:
         # Decode base64 to image
@@ -55,24 +55,25 @@ def process_frame(img_base64, att_type="masuk"):
                 })
                 
                 # Mark attendance with cooldown
-                handle_attendance(name, att_type)
+                handle_attendance(name, att_type, shift)
         
         return recognition_data
     except Exception as e:
         # print(f"Processing error: {e}")
         return []
 
-def handle_attendance(name, att_type):
+def handle_attendance(name, att_type, shift):
     """Marks attendance with cooldown logic"""
     now = time.time()
-    cache_key = f"{name}_{att_type}"
+    # Cooldown cache key now includes shift to allow attendance in different shifts
+    cache_key = f"{name}_{att_type}_{shift}"
     if cache_key in attendance_cache:
         if (now - attendance_cache[cache_key]) < config.ATTENDANCE_COOLDOWN:
             return
     
     attendance_cache[cache_key] = now
-    mark_attendance(name, att_type)
-    print(f"Recorded {att_type} for {name} via Web")
+    mark_attendance(name, att_type, shift)
+    print(f"Recorded {att_type} for {name} on {shift} via Web")
 
 @app.route('/')
 def index():
@@ -85,12 +86,13 @@ def process():
         return jsonify({"error": "No image data"}), 400
     
     att_type = data.get('type', 'masuk')
-    results = process_frame(data['image'], att_type)
+    shift = data.get('shift', 'Shift 1')
+    results = process_frame(data['image'], att_type, shift)
     recent_logs = get_recent_attendance(5)
     
     return jsonify({
         "results": results,
-        "recent_logs": [{"name": r[0], "time": r[1].split(" ")[1], "type": r[2]} for r in recent_logs]
+        "recent_logs": [{"name": r[0], "time": r[1].split(" ")[1], "type": r[2], "shift": r[3]} for r in recent_logs]
     })
 
 if __name__ == '__main__':

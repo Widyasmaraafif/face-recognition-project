@@ -65,6 +65,14 @@
             border-color: #22c55e !important;
             box-shadow: 0 4px 6px -1px rgba(34, 197, 94, 0.2);
         }
+
+        /* Active shift button */
+        .shift-btn-active {
+            background-color: #3b82f6 !important;
+            color: white !important;
+            border-color: #3b82f6 !important;
+            box-shadow: 0 4px 6px -1px rgba(59, 130, 246, 0.2);
+        }
     </style>
 </head>
 <body class="bg-slate-50 min-h-screen flex flex-col">
@@ -88,8 +96,20 @@
         </div>
     </nav>
 
-    <!-- Attendance Type Selection (Mobile Sticky Bottom or Top) -->
-    <div class="bg-white border-b border-slate-100 p-3 md:hidden">
+    <!-- Selection Controls (Mobile) -->
+    <div class="bg-white border-b border-slate-100 p-3 md:hidden space-y-3">
+        <!-- Shift Selection Mobile -->
+        <div class="flex space-x-2">
+            <button id="mobile-shift-1" onclick="setShift('Shift 1')" class="flex-1 py-2 px-4 rounded-xl border border-slate-200 font-bold text-[10px] flex items-center justify-center space-x-2 transition-all shift-btn-active">
+                <i class="fas fa-clock"></i>
+                <span>SHIFT 1</span>
+            </button>
+            <button id="mobile-shift-2" onclick="setShift('Shift 2')" class="flex-1 py-2 px-4 rounded-xl border border-slate-200 font-bold text-[10px] flex items-center justify-center space-x-2 transition-all">
+                <i class="fas fa-moon"></i>
+                <span>SHIFT 2</span>
+            </button>
+        </div>
+        <!-- Type Selection Mobile -->
         <div class="flex space-x-2">
             <button id="mobile-btn-masuk" onclick="setAttendanceType('masuk')" class="flex-1 py-3 px-4 rounded-xl border border-slate-200 font-bold text-sm flex items-center justify-center space-x-2 transition-all type-btn-active">
                 <i class="fas fa-sign-in-alt"></i>
@@ -108,16 +128,32 @@
             
             <!-- Left Side: Video Feed -->
             <div class="lg:col-span-7 xl:col-span-8 space-y-4">
-                <!-- Desktop Attendance Type Selection -->
-                <div class="hidden md:flex bg-white p-2 rounded-2xl shadow-sm border border-slate-200 inline-flex">
-                    <button id="desktop-btn-masuk" onclick="setAttendanceType('masuk')" class="py-2 px-8 rounded-xl font-bold text-sm flex items-center space-x-2 transition-all type-btn-active">
-                        <i class="fas fa-sign-in-alt"></i>
-                        <span>Absen Masuk</span>
-                    </button>
-                    <button id="desktop-btn-pulang" onclick="setAttendanceType('pulang')" class="py-2 px-8 rounded-xl font-bold text-sm flex items-center space-x-2 transition-all text-slate-500 hover:bg-slate-50">
-                        <i class="fas fa-sign-out-alt"></i>
-                        <span>Absen Pulang</span>
-                    </button>
+                
+                <!-- Desktop Controls -->
+                <div class="hidden md:flex flex-wrap gap-4 items-center">
+                    <!-- Shift Selection Desktop -->
+                    <div class="bg-white p-1.5 rounded-2xl shadow-sm border border-slate-200 flex">
+                        <button id="desktop-shift-1" onclick="setShift('Shift 1')" class="py-2 px-6 rounded-xl font-bold text-xs flex items-center space-x-2 transition-all shift-btn-active">
+                            <i class="fas fa-clock"></i>
+                            <span>Shift 1</span>
+                        </button>
+                        <button id="desktop-shift-2" onclick="setShift('Shift 2')" class="py-2 px-6 rounded-xl font-bold text-xs flex items-center space-x-2 transition-all text-slate-500 hover:bg-slate-50">
+                            <i class="fas fa-moon"></i>
+                            <span>Shift 2</span>
+                        </button>
+                    </div>
+
+                    <!-- Type Selection Desktop -->
+                    <div class="bg-white p-1.5 rounded-2xl shadow-sm border border-slate-200 flex">
+                        <button id="desktop-btn-masuk" onclick="setAttendanceType('masuk')" class="py-2 px-6 rounded-xl font-bold text-xs flex items-center space-x-2 transition-all type-btn-active">
+                            <i class="fas fa-sign-in-alt"></i>
+                            <span>Absen Masuk</span>
+                        </button>
+                        <button id="desktop-btn-pulang" onclick="setAttendanceType('pulang')" class="py-2 px-6 rounded-xl font-bold text-xs flex items-center space-x-2 transition-all text-slate-500 hover:bg-slate-50">
+                            <i class="fas fa-sign-out-alt"></i>
+                            <span>Absen Pulang</span>
+                        </button>
+                    </div>
                 </div>
 
                 <div class="bg-white rounded-2xl video-container overflow-hidden border border-slate-100 relative">
@@ -141,7 +177,7 @@
                                     <i class="fas fa-check-circle text-green-600 text-lg md:text-xl"></i>
                                 </div>
                                 <div class="flex-grow">
-                                    <p id="feedback-type" class="text-[10px] font-bold text-green-600 uppercase tracking-widest">ABSEN MASUK BERHASIL</p>
+                                    <p id="feedback-info" class="text-[10px] font-bold text-green-600 uppercase tracking-widest">ABSEN MASUK • SHIFT 1 BERHASIL</p>
                                     <h2 id="detected-name" class="text-lg md:text-xl font-bold text-slate-800 truncate max-w-[150px] md:max-w-none">Nama Pengguna</h2>
                                 </div>
                                 <div class="bg-slate-100 px-2 py-1 rounded-full shrink-0">
@@ -203,7 +239,7 @@
     <!-- Footer -->
     <footer class="bg-white border-t border-slate-200 py-6 px-4">
         <div class="max-w-7xl mx-auto flex flex-col md:flex-row justify-between items-center text-slate-400 text-[10px] md:text-xs">
-            <p class="text-center md:text-left">&copy; 2026 Face Recognition Attendance System. V2.0 Mobile Optimized.</p>
+            <p class="text-center md:text-left">&copy; 2026 Face Recognition Attendance System. V2.1 Shift Support.</p>
             <div class="flex space-x-4 mt-4 md:mt-0">
                 <span class="flex items-center"><i class="fas fa-shield-halved mr-1"></i> Secure</span>
                 <span class="flex items-center"><i class="fas fa-bolt mr-1"></i> Fast AI</span>
@@ -220,7 +256,7 @@
         const cameraOverlay = document.getElementById('camera-overlay');
         const scanLine = document.getElementById('scan-line');
         const feedbackUI = document.getElementById('match-feedback');
-        const feedbackType = document.getElementById('feedback-type');
+        const feedbackInfo = document.getElementById('feedback-info');
         const detectedName = document.getElementById('detected-name');
         const detectedConf = document.getElementById('detected-conf');
         const connectionDot = document.getElementById('connection-dot');
@@ -228,6 +264,7 @@
         const currentTimeText = document.getElementById('current-time');
 
         let currentAttendanceType = 'masuk';
+        let currentShift = 'Shift 1';
         let lastDetectedTime = 0;
         const FEEDBACK_DURATION = 3000;
 
@@ -239,32 +276,46 @@
         setInterval(updateClock, 1000);
         updateClock();
 
+        function setShift(shift) {
+            currentShift = shift;
+            
+            // Update buttons UI
+            const shifts = ['Shift 1', 'Shift 2'];
+            shifts.forEach(s => {
+                const mobileBtn = document.getElementById(`mobile-shift-${s.split(' ')[1]}`);
+                const desktopBtn = document.getElementById(`desktop-shift-${s.split(' ')[1]}`);
+                
+                if (s === shift) {
+                    mobileBtn.classList.add('shift-btn-active');
+                    desktopBtn.classList.add('shift-btn-active');
+                    desktopBtn.classList.remove('text-slate-500', 'hover:bg-slate-50');
+                } else {
+                    mobileBtn.classList.remove('shift-btn-active');
+                    desktopBtn.classList.remove('shift-btn-active');
+                    desktopBtn.classList.add('text-slate-500', 'hover:bg-slate-50');
+                }
+            });
+        }
+
         function setAttendanceType(type) {
             currentAttendanceType = type;
             
-            // Update mobile buttons
-            const mMasuk = document.getElementById('mobile-btn-masuk');
-            const mPulang = document.getElementById('mobile-btn-pulang');
-            
-            // Update desktop buttons
-            const dMasuk = document.getElementById('desktop-btn-masuk');
-            const dPulang = document.getElementById('desktop-btn-pulang');
-            
-            if (type === 'masuk') {
-                mMasuk.classList.add('type-btn-active');
-                mPulang.classList.remove('type-btn-active');
-                dMasuk.classList.add('type-btn-active');
-                dMasuk.classList.remove('text-slate-500', 'hover:bg-slate-50');
-                dPulang.classList.remove('type-btn-active');
-                dPulang.classList.add('text-slate-500', 'hover:bg-slate-50');
-            } else {
-                mPulang.classList.add('type-btn-active');
-                mMasuk.classList.remove('type-btn-active');
-                dPulang.classList.add('type-btn-active');
-                dPulang.classList.remove('text-slate-500', 'hover:bg-slate-50');
-                dMasuk.classList.remove('type-btn-active');
-                dMasuk.classList.add('text-slate-500', 'hover:bg-slate-50');
-            }
+            // Update buttons UI
+            const types = ['masuk', 'pulang'];
+            types.forEach(t => {
+                const mobileBtn = document.getElementById(`mobile-btn-${t}`);
+                const desktopBtn = document.getElementById(`desktop-btn-${t}`);
+                
+                if (t === type) {
+                    mobileBtn.classList.add('type-btn-active');
+                    desktopBtn.classList.add('type-btn-active');
+                    desktopBtn.classList.remove('text-slate-500', 'hover:bg-slate-50');
+                } else {
+                    mobileBtn.classList.remove('type-btn-active');
+                    desktopBtn.classList.remove('type-btn-active');
+                    desktopBtn.classList.add('text-slate-500', 'hover:bg-slate-50');
+                }
+            });
         }
 
         // Access camera
@@ -317,7 +368,8 @@
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ 
                         image: base64Img,
-                        type: currentAttendanceType
+                        type: currentAttendanceType,
+                        shift: currentShift
                     })
                 });
                 
@@ -346,7 +398,7 @@
         function showMatchFeedback(name, conf) {
             detectedName.innerText = name;
             detectedConf.innerText = `${conf}% Match`;
-            feedbackType.innerText = `ABSEN ${currentAttendanceType.toUpperCase()} BERHASIL`;
+            feedbackInfo.innerText = `ABSEN ${currentAttendanceType.toUpperCase()} • ${currentShift.toUpperCase()} BERHASIL`;
             
             feedbackUI.style.opacity = '1';
             feedbackUI.style.transform = 'translateY(0)';
@@ -385,11 +437,12 @@
                         </div>
                         <div class="overflow-hidden">
                             <p class="font-bold text-slate-700 text-xs md:text-sm truncate">${log.name}</p>
-                            <p class="text-[9px] text-slate-400 uppercase font-bold tracking-tighter">${typeLabel} • ${log.time}</p>
+                            <p class="text-[9px] text-slate-400 uppercase font-bold tracking-tighter">${typeLabel} • ${log.shift} • ${log.time}</p>
                         </div>
                     </div>
-                    <div class="text-right shrink-0 ml-2">
-                        <span class="${typeBg} ${typeColor} text-[9px] font-bold px-2 py-1 rounded-full uppercase tracking-widest">${typeLabel}</span>
+                    <div class="text-right shrink-0 ml-2 flex flex-col items-end space-y-1">
+                        <span class="${typeBg} ${typeColor} text-[8px] font-bold px-2 py-0.5 rounded-full uppercase tracking-widest">${typeLabel}</span>
+                        <span class="bg-slate-100 text-slate-500 text-[8px] font-bold px-2 py-0.5 rounded-full uppercase tracking-widest">${log.shift}</span>
                     </div>
                 `;
                 logList.appendChild(div);

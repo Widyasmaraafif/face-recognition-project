@@ -1,72 +1,103 @@
-# Sistem Absensi Pengenalan Wajah (Face Recognition Attendance System)
+# 🤖 Sistem Absensi Pengenalan Wajah (Face Recognition Attendance System)
 
-Sistem absensi otomatis berbasis Python yang menggunakan pustaka **DeepFace** untuk pengenalan wajah, **OpenCV** untuk pemrosesan video, dan **Flask** untuk antarmuka web yang bisa diakses secara online.
+[![Python](https://img.shields.io/badge/Python-3.10%2B-blue.svg)](https://www.python.org/)
+[![DeepFace](https://img.shields.io/badge/AI-DeepFace-orange.svg)](https://github.com/serengil/deepface)
+[![Flask](https://img.shields.io/badge/Web-Flask-lightgrey.svg)](https://flask.palletsprojects.com/)
+[![Streamlit](https://img.shields.io/badge/Dashboard-Streamlit-red.svg)](https://streamlit.io/)
 
-## Fitur Unggulan v3.0 (Web Edition)
+Sistem absensi otomatis berbasis Python yang menggabungkan kecanggihan **DeepFace** untuk pengenalan wajah, **OpenCV** untuk pemrosesan video *real-time*, dan **Flask** untuk antarmuka web modern yang responsif.
 
-- **Akses Web & Online**: Kini hadir dengan antarmuka web menggunakan **Flask**, memungkinkan akses dari browser di perangkat apapun (HP, Laptop, Tablet).
-- **Client-Side Camera**: Menggunakan kamera perangkat pengguna (browser) untuk pemrosesan, sehingga server tidak perlu memiliki kamera fisik.
-- **Pengenalan Wajah Berulir (Threaded Recognition)**: Proses pengenalan wajah yang efisien di sisi server.
-- **Visualisasi Confidence Score**: Menampilkan persentase tingkat keyakinan AI pada setiap wajah yang terdeteksi di browser.
-- **Dashboard Admin Canggih (Streamlit)**:
-  - **Filter Tanggal**: Melihat laporan kehadiran pada rentang waktu tertentu.
-  - **Visualisasi Statistik**: Grafik kehadiran per orang dan per departemen.
-  - **Ekspor Data Multi-Format**: Unduh laporan kehadiran langsung ke format **Excel (.xlsx)** atau **CSV**.
-- **Integrasi Database (SQLite)**: Manajemen data terpusat dan efisien di `attendance_system.db`.
+## 🚀 Fitur Unggulan v3.0 (Web Edition)
 
-## Persyaratan Sistem
+- **🖥️ Akses Web & Multi-Device**: Antarmuka berbasis web menggunakan **Flask**, memungkinkan akses dari browser di berbagai perangkat (Smartphone, Laptop, Tablet).
+- **📸 Client-Side Camera**: Menggunakan kamera perangkat pengguna melalui browser, mengurangi beban server dan tidak memerlukan kamera fisik yang terhubung ke server.
+- **⚡ Threaded Recognition**: Pemrosesan pengenalan wajah dilakukan secara *asynchronous* (berulir) di sisi server untuk performa yang optimal dan tanpa jeda.
+- **📊 Visualisasi Confidence Score**: Menampilkan persentase tingkat keyakinan AI secara langsung pada setiap wajah yang terdeteksi.
+- **🛡️ Dashboard Admin Canggih (Streamlit)**:
+  - **Filter Cerdas**: Lihat laporan berdasarkan rentang tanggal tertentu.
+  - **Statistik Visual**: Grafik interaktif untuk melihat tren kehadiran per individu atau departemen.
+  - **Ekspor Data**: Unduh laporan langsung ke format **Excel (.xlsx)** atau **CSV**.
+- **🗄️ Integrasi Database (SQLite)**: Manajemen data terpusat dan aman menggunakan `attendance_system.db`.
 
-- Python 3.10+
-- Webcam (pada perangkat client/browser)
-- Koneksi internet (hanya untuk unduhan model pertama kali)
+## 🛠️ Persyaratan Sistem
 
-## Instalasi
+- **Python**: Versi 3.10 atau lebih baru.
+- **Hardware**: Kamera/Webcam pada perangkat klien (browser).
+- **Koneksi**: Diperlukan saat pertama kali menjalankan untuk mengunduh model AI (seperti SFace).
 
-1. Clone repositori ini atau ekstrak file proyek.
-2. Instal dependensi yang diperlukan:
+## ⚙️ Instalasi
+
+1. **Clone Repositori**:
+   ```bash
+   git clone https://github.com/username/face-recognition-project.git
+   cd face-recognition-project
+   ```
+
+2. **Buat Virtual Environment (Disarankan)**:
+   ```bash
+   python -m venv venv
+   # Aktifkan di Windows:
+   .\venv\Scripts\activate
+   # Aktifkan di Linux/Mac:
+   source venv/bin/activate
+   ```
+
+3. **Instal Dependensi**:
    ```bash
    pip install -r requirements.txt
    ```
 
-## Cara Penggunaan
+## 📖 Cara Penggunaan
 
-### 1. Pendaftaran Wajah Baru
-Daftarkan wajah dengan data lengkap:
+### 1. Registrasi Wajah Baru
+Daftarkan profil dan wajah karyawan/pengguna sebelum melakukan absensi:
 ```bash
 python register.py
 ```
-- Masukkan nama, departemen, dan jabatan.
-- Tekan **'s'** untuk menyimpan foto.
-- Tekan **'q'** untuk batal.
+- Ikuti instruksi di terminal (Nama, Departemen, Jabatan).
+- Tekan **'s'** untuk menangkap dan menyimpan foto wajah.
+- Tekan **'q'** untuk membatalkan proses.
 
-### 2. Menjalankan Aplikasi Web (Untuk Penggunaan Online/Lokal)
-Jalankan server Flask:
+### 2. Jalankan Aplikasi Absensi (Web Server)
+Jalankan server Flask untuk mulai menerima absensi:
 ```bash
 python app.py
 ```
-- Buka browser dan akses `http://localhost:5000` atau alamat IP server Anda.
-- Izinkan akses kamera pada browser.
-- Sistem akan mulai memindai wajah secara otomatis.
+- Akses melalui browser di `http://localhost:5000` atau alamat IP server Anda.
+- Pastikan memberikan izin akses kamera pada browser.
 
-### 3. Membuka Dashboard Admin
-Lihat laporan dan statistik absensi melalui browser:
+### 3. Dashboard Admin (Laporan & Statistik)
+Lihat dan kelola data kehadiran melalui dashboard interaktif:
 ```bash
 streamlit run dashboard.py
 ```
 
-## Struktur Proyek
+## 📁 Struktur Proyek
 
-- `app.py`: Server Flask untuk aplikasi web utama.
-- `templates/`: Folder berisi file HTML untuk antarmuka web.
-- `main.py`: Aplikasi desktop (Legacy/Offline).
-- `register.py`: Skrip pendaftaran wajah dengan profil lengkap.
-- `dashboard.py`: Dashboard admin interaktif.
-- `database.py`: Modul manajemen database SQLite.
-- `config.py`: File konfigurasi (Model AI, Cooldown, Direktori).
-- `attendance_system.db`: Database SQLite pusat.
-- `dataset/`: Folder penyimpanan foto wajah terdaftar.
-- `requirements.txt`: Daftar pustaka Python terbaru.
+- `app.py`: Server utama Flask untuk antarmuka web absensi.
+- `dashboard.py`: Aplikasi Streamlit untuk visualisasi data dan laporan.
+- `register.py`: Skrip untuk mendaftarkan wajah dan data profil baru.
+- `main.py`: Aplikasi desktop berbasis OpenCV (Legacy/Offline).
+- `config.py`: Pengaturan pusat (Model AI, Waktu Jeda, Direktori).
+- `database.py`: Modul logika untuk interaksi dengan SQLite.
+- `templates/`: File HTML untuk tampilan antarmuka web.
+- `dataset/`: Folder penyimpanan foto wajah yang telah terdaftar.
+- `attendance_system.db`: Database SQLite tempat semua data disimpan.
+- `requirements.txt`: Daftar pustaka Python yang diperlukan.
 
-## Catatan
-- Untuk penggunaan "Online" di luar jaringan lokal, Anda perlu melakukan *Port Forwarding* atau menggunakan layanan seperti *Ngrok* untuk mengekspos port 5000.
-- Pastikan menggunakan HTTPS jika ingin mengakses kamera dari domain publik (persyaratan keamanan browser modern).
+## 🔧 Konfigurasi (`config.py`)
+
+Anda dapat menyesuaikan sistem melalui file `config.py`:
+- `MODEL_NAME`: Pilih model AI (Default: `SFace` - Ringan & Cepat).
+- `ATTENDANCE_COOLDOWN`: Waktu tunggu (dalam detik) sebelum seseorang bisa absen lagi (Default: 60 detik).
+- `DETECTOR_BACKEND`: Backend deteksi wajah (Default: `opencv`).
+
+## ⚠️ Catatan Penting
+- **HTTPS**: Browser modern mewajibkan koneksi HTTPS untuk mengakses kamera jika diakses dari luar `localhost`. Gunakan layanan seperti **Ngrok** untuk pengujian publik yang aman.
+- **Pencahayaan**: Pastikan pencahayaan cukup saat pendaftaran dan absensi untuk hasil pengenalan yang maksimal.
+
+## 🤝 Kontribusi
+Kontribusi selalu terbuka! Silakan lakukan *Fork* repositori ini, buat *Branch* baru, dan kirimkan *Pull Request*.
+
+## 📄 Lisensi
+Proyek ini dilisensikan di bawah MIT License.
